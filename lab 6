@@ -1,0 +1,104 @@
+class Hostel:
+    def __init__(self):
+        self.rooms = {i: [] for i in range(1, 21)}  # Створюємо 20 кімнат
+        self.load_data()  # Завантаження даних після створення об'єкту
+
+    # Решта методів вашого класу
+
+    def load_data(self):
+        try:
+            with open("hostel_data.txt", "r") as file:
+                lines = file.readlines()
+                for line in lines:
+                    room, occupants = line.strip().split(": ")
+                    room_number = int(room.split()[1])
+                    if occupants != '[]':
+                        students = occupants[1:-1].split(", ")
+                        self.rooms[room_number] = students
+        except FileNotFoundError:
+            print("Файл з даними не знайдено. Створено новий гуртожиток.")
+
+    def save_data(self):
+        with open("hostel_data.txt", "w") as file:
+            for room, occupants in self.rooms.items():
+                file.write(f"Кімната {room}: {occupants}\n")
+
+    def save_students_data(self, students_data):
+        with open("students_data.txt", "w") as file:
+            for student in students_data:
+                file.write(f"{student}\n")
+
+    def load_students_data(self):
+        try:
+            with open("students_data.txt", "r") as file:
+                students_data = file.readlines()
+                # Обробка даних з файлу students_data.txt
+                return students_data
+        except FileNotFoundError:
+            print("Файл із даними про студентів не знайдено.")
+
+    def add_student_to_room(self, room_number, student_name):
+        # Додавання студента у вказану кімнату
+        if room_number in self.rooms:
+            if len(self.rooms[room_number]) < 3:
+                self.rooms[room_number].append(student_name)
+                print(f"{student_name} додано до кімнати {room_number}.")
+                self.save_data()  # Збереження даних у файлі після змін
+            else:
+                print(f"Кімната {room_number} вже заповнена.")
+        else:
+            print(f"Кімната {room_number} не існує в гуртожитку.")
+
+    def remove_student_from_room(self, room_number, student_number):
+        # Видалення студента з вказаної кімнати за його номером у списку
+        if room_number in self.rooms:
+            room_occupants = self.rooms[room_number]
+            if student_number > 0 and student_number <= len(room_occupants):
+                removed_student = room_occupants.pop(student_number - 1)
+                print(f"{removed_student} виселено з кімнати {room_number}.")
+                self.save_data()  # Збереження даних у файлі після змін
+            else:
+                print("Невірний номер студента.")
+        else:
+            print(f"Кімната {room_number} не існує в гуртожитку.")
+
+    def show_all_rooms(self):
+        for room, occupants in self.rooms.items():
+            print(f"Кімната {room}: {occupants}")
+
+# Решта коду залишається такою ж, як було раніше
+
+hostel = Hostel()
+
+while True:
+    print("\nМеню:")
+    print("1. Додати студента до кімнати")
+    print("2. Видалити студента з кімнати")
+    print("3. Показати список кімнат")
+    print("4. Зберегти дані")
+    print("5. Вийти")
+
+    choice = input("Оберіть опцію: ")
+
+    if choice == '1':
+        room = int(input("Введіть номер кімнати: "))
+        student = input("Введіть ім'я студента: ")
+        hostel.add_student_to_room(room, student)
+    elif choice == '2':
+        room = int(input("Введіть номер кімнати: "))
+        hostel.show_all_rooms()
+        student_number = int(input("Введіть номер студента для видалення: "))
+        hostel.remove_student_from_room(room, student_number)
+    elif choice == '3':
+        hostel.show_all_rooms()
+    elif choice == '4':
+        hostel.save_data()  # Збереження даних про кімнати
+        students_data = []  # Отримання даних про студентів для збереження
+        for occupants in hostel.rooms.values():
+            students_data.extend(occupants)
+        hostel.save_students_data(students_data)  # Збереження даних про студентів
+        print("Дані збережено.")
+    elif choice == '5':
+        break
+    else:
+        print("Невірний вибір опції. Спробуйте ще раз.")
